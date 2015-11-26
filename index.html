@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+
+<script src="//d3js.org/d3.v3.min.js"></script>
+<link rel="stylesheet" type="text/css" href="http://fonts.googleapis.com/css?family=Roboto+Condensed">
+<link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css">
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+
+
+<style>
+
+text {
+  font: 10px "Roboto Condensed", "Helvetica Neue", Helvetica, sans-serif;
+}
+
+button {
+  margin-left: 10px;
+  font: 14px "Roboto Condensed", "Helvetica Neue", Helvetica, sans-serif;
+  padding: 5px 5px 5px 5px;
+  border: 1px solid #666;
+  float:left;
+  color:#000;
+  text-decoration:none;
+  background: #dcdcdc url(icon.png) no-repeat scroll 5px center;
+}
+
+button:target {
+  background: black;
+}
+
+.bar {
+  fill: #483D8B;
+}
+
+.bar text {
+  fill: #fff;
+}
+
+.axis path, .axis line {
+  fill: none;
+  stroke: #000;
+  shape-rendering: crispEdges;
+}
+
+.buttons {
+  font: 10px "Roboto Condensed", "Helvetica Neue", Helvetica, sans-serif;
+position:relative;
+}
+
+</style>
+
+<body>
+  <div id="hist"></div>
+  <div id="buttons" class="btn-group btn-group-center" role="group" aria-label="...">
+    <button id="2019" class="btn btn-default" onclick="updateData(this.id)">2019</button>
+    <button id="2018" class="btn btn-default" onclick="updateData(this.id)">2018</button>
+    <button id="2017" class="btn btn-default" onclick="updateData(this.id)">2017</button>
+    <button id="2016" class="btn btn-default" onclick="updateData(this.id)">2016</button>
+  </div>
+
+<script>
+
+
+// size + margin vars
+var margin = {top: 60, right: 20, bottom: 40, left: 50},
+    width = 615 - margin.left - margin.right,
+    height = 400 - margin.top - margin.bottom;
+
+// bar width var
+var x = d3.scale.ordinal()
+    .rangeRoundBands([0, width], 0.03);
+
+// func for y size
+var y = d3.scale.linear()
+    .range([height, 0]);
+
+// func for x axis
+var xAxis = d3.svg.axis()
+    .scale(x)
+    .orient("bottom");
+
+// func for y axis
+var yAxis = d3.svg.axis()
+    .scale(y)
+    .orient("left");
+
+// create svg
+var svg = d3.select("#hist").append("svg")
+    .attr("width", width + margin.left + margin.right)
+    .attr("height", height + margin.top + margin.bottom)
+  .append("g")
+    .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+// title
+svg.append("text")
+        .attr("class", "title")
+        .attr("x", 0)             
+        .attr("y", -35)
+        .attr("text-anchor", "left")  
+        .style("font-size", "20px") 
+        .text("Stress Levels of Tufts Undergraduates (Class of 2019)" );
+        
+svg.append("text")
+        .attr("x", 0)            
+        .attr("y", -13)
+        .style("font-size", "16px")
+        .attr("fill", "#989898")
+        .text("How does stress compare by year?");
+  
+
+// input data - *HOST DEPENDENT*
+d3.tsv("2019.tsv", type, function(error, data) {
+  x.domain(data.map(function(d) { return d["stress"]; }));
+  y.domain([0, d3.max(data, function(d) { return d["count"]; })]);
+
+  // x axis params
+  svg.append("g")
+      .attr("class", "x axis")
+      .attr("transform", "translate(0," + height + ")")
+      .call(xAxis)
+    .append("text")
+      .attr("y", 22)
+      .attr("x", 300)
+      .attr("dy", ".71em")
+      .style("text-anchor", "end")
+      .style("font-size", "16px")
+      .text("Stress level");
+
+  // y axis params
+  svg.append("g")
+      .attr("class", "y axis")
+      .call(yAxis)
+    .append("text")
+      .attr("transform", "rotate(-90)")
+      .attr("y", 2- margin.left)
+      .attr("x", 10 - (height / 2))
+      .attr("dy", "1em")
+      .style("text-anchor", "middle")
+      .style("font-size", "16px")
+      .text("% of students");
+
+  // graphing data
+  svg.selectAll(".bar")
+      .data(data)
+    .enter().append("rect")
+      .attr("class", "bar")
+      .attr("x", function(d) { return x(d["stress"]); })
+      .attr("width", x.rangeBand())
+      .attr("y", function(d) { return y(d["count"]); })
+      .attr("height", function(d) { return height - y(d["count"]); })
+});
+
+function updateData(id) {
+    // Get the data again
+      d3.tsv(id+".tsv", type, function(error, data) {
+        x.domain(data.map(function(d) { return d["stress"]; }));
+        y.domain([0, d3.max(data, function(d) { return d["count"]; })]);
+
+    svg.selectAll(".bar").data(data).transition().duration(750)
+      .attr("class", "bar")
+      .attr("x", function(d) { return x(d["stress"]); })
+      .attr("width", x.rangeBand())
+      .attr("y", function(d) { return y(d["count"]); })
+      .attr("height", function(d) { return height - y(d["count"]);});
+
+    // title
+    svg.selectAll(".title")
+        .text("Stress Levels of Tufts Undergraduates (Class of "+id+")" );
+
+      });
+
+    };
+
+function type(d) {
+  d["count"] = +d["count"];
+  return d;
+}
+
+
+</script>
