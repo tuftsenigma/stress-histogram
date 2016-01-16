@@ -3,8 +3,8 @@
 
 <script src="//d3js.org/d3.v3.min.js"></script>
 <link rel="stylesheet" type="text/css" href="http://fonts.googleapis.com/css?family=Roboto+Condensed">
-<link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css">
-<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+<!-- <link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css">
+ --><script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
 
 
 <style>
@@ -63,8 +63,8 @@ position:relative;
 
 // size + margin vars
 var margin = {top: 60, right: 20, bottom: 40, left: 50},
-    width = 615 - margin.left - margin.right,
-    height = 400 - margin.top - margin.bottom;
+    width = 480 - margin.left - margin.right,
+    height = 300 - margin.top - margin.bottom;
 
 // bar width var
 var x = d3.scale.ordinal()
@@ -120,7 +120,7 @@ d3.tsv("2019.tsv", type, function(error, data) {
       .call(xAxis)
     .append("text")
       .attr("y", 22)
-      .attr("x", 300)
+      .attr("x", 2*width/3)
       .attr("dy", ".71em")
       .style("text-anchor", "end")
       .style("font-size", "16px")
@@ -153,6 +153,7 @@ d3.tsv("2019.tsv", type, function(error, data) {
 function updateData(id) {
     // Get the data again
       d3.tsv(id+".tsv", type, function(error, data) {
+        console.log(data);
         x.domain(data.map(function(d) { return d["stress"]; }));
         y.domain([0, d3.max(data, function(d) { return d["count"]; })]);
 
@@ -162,6 +163,7 @@ function updateData(id) {
       .attr("width", x.rangeBand())
       .attr("y", function(d) { return y(d["count"]); })
       .attr("height", function(d) { return height - y(d["count"]);});
+
 
     // title
     svg.selectAll(".title")
